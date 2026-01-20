@@ -1,0 +1,8 @@
+/* Import DaisyUI's prebuilt component CSS as a fallback to ensure components
+	like .btn, .navbar, .hero, etc. are available in the final bundle. This
+	helps when the plugin-based injection doesn't appear in the output. */
+@import "daisyui/chunks.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
