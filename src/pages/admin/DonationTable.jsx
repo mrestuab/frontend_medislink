@@ -13,7 +13,9 @@ import {
     AlertCircle,
     Truck,           
     ClipboardCheck,  
-    Shield           
+    Shield,
+    AlertTriangle,
+    Info
 } from "lucide-react";
 
 const CONDITIONS = ["Sangat Baik (Seperti Baru)", "Baik (Layak Pakai)", "Cukup (Perlu Perbaikan Kecil)", "Rusak Ringan"];
@@ -22,6 +24,18 @@ const DonationsTable = ({ donations, onReceive, onApprove }) => {
   const [selectedDonation, setSelectedDonation] = useState(null);
   const [adminCondition, setAdminCondition] = useState(CONDITIONS[1]);
 
+  const [confirmModal, setConfirmModal] = useState({
+      isOpen: false,
+      title: "",
+      message: "",
+      onConfirm: null,
+      type: "info"
+  });
+
+  const closeConfirm = () => {
+      setConfirmModal({ ...confirmModal, isOpen: false });
+  };
+
   const handleReviewClick = (donation) => {
       setSelectedDonation(donation);
       setAdminCondition(CONDITIONS[1]); 
@@ -29,14 +43,21 @@ const DonationsTable = ({ donations, onReceive, onApprove }) => {
 
   const handleCloseModal = () => setSelectedDonation(null);
   
-  const handleReceiveItem = async () => {
+  const handleReceiveItem = () => {
     if (selectedDonation) {
-        if(window.confirm("Konfirmasi barang fisik sudah sampai di tangan Admin? Status user akan berubah.")) {
-            if (onReceive) {
-                await onReceive(selectedDonation.id || selectedDonation._id);
+        setConfirmModal({
+            isOpen: true,
+            title: "Konfirmasi Penerimaan Barang",
+            message: "Apakah barang fisik sudah benar-benar sampai di tangan Admin? Status donasi akan berubah.",
+            type: "info",
+            onConfirm: async () => {
+                if (onReceive) {
+                    await onReceive(selectedDonation.id || selectedDonation._id);
+                }
+                closeConfirm(); 
+                handleCloseModal(); 
             }
-            handleCloseModal();
-        }
+        });
     }
   };
 
@@ -76,6 +97,36 @@ const DonationsTable = ({ donations, onReceive, onApprove }) => {
 
   return (
     <>
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center border border-gray-100">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                    confirmModal.type === 'info' ? 'bg-blue-50 text-blue-600' : 'bg-yellow-50 text-yellow-600'
+                }`}>
+                    {confirmModal.type === 'info' ? <Info className="w-8 h-8" /> : <AlertTriangle className="w-8 h-8" />}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{confirmModal.title}</h3>
+                <p className="text-gray-500 mb-6 text-sm leading-relaxed">{confirmModal.message}</p>
+                <div className="flex gap-3">
+                    <button 
+                        onClick={closeConfirm}
+                        className="flex-1 btn btn-ghost text-gray-600 hover:bg-gray-100 rounded-xl"
+                    >
+                        Batal
+                    </button>
+                    <button 
+                        onClick={confirmModal.onConfirm}
+                        className={`flex-1 btn border-none text-white rounded-xl ${
+                            confirmModal.type === 'info' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-yellow-500 hover:bg-yellow-600'
+                        }`}
+                    >
+                        Ya, Konfirmasi
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

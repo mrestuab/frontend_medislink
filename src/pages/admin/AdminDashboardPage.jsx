@@ -31,9 +31,11 @@ import { getCurrentUserProfile } from "../../services/userServices";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  
   const [activeTab, setActiveTab] = useState("inventory"); 
   const [isAddToolOpen, setIsAddToolOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
   const [notification, setNotification] = useState(null);
   const [confirmModal, setConfirmModal] = useState({
       isOpen: false,
@@ -247,6 +249,9 @@ export default function AdminDashboard() {
     }
   };
 
+  const pendingLoansCount = loans.filter(l => l.status === 'pending').length;
+  const pendingDonationsCount = donations.filter(d => d.status === 'pending').length;
+
   if (isLoading) {
     return (
         <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -299,7 +304,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-
       <header className="fixed top-0 w-full bg-white z-40 shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
@@ -321,11 +325,11 @@ export default function AdminDashboard() {
       <main className="max-w-7xl mx-auto px-6 pt-28 pb-10">
         <div className="flex gap-8 border-b border-gray-200 mb-8 overflow-x-auto no-scrollbar">
           {[
-            { id: "loans", label: `Peminjaman (${loans.length})` },
+            { id: "loans", label: `Peminjaman (${pendingLoansCount})` }, 
             { id: "inventory", label: "Inventaris" },
             { id: "news", label: "Berita" },
             { id: "ads", label: "Manajemen Iklan" }, 
-            { id: "donations", label: `Donasi (${donations.filter(d => d.status === 'pending').length})` },
+            { id: "donations", label: `Donasi (${pendingDonationsCount})` },
           ].map((tab) => (
             <button
               key={tab.id}
