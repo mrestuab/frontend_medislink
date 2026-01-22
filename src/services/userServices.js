@@ -210,3 +210,13 @@ export const resetPassword = async (email, otp, newPassword) => {
   });
   return response.data;
 };
+
+export const getNewsById = async (id) => {
+  try {
+    const response = await api.get(`/news/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching news detail:", error);
+    throw error;
+  }
+};

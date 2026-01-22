@@ -1,20 +1,31 @@
-import React from "react";
-import { Image as ImageIcon, X, Link as LinkIcon } from "lucide-react";
+import React, { useState } from "react";
+import { Image as ImageIcon, X, Link as LinkIcon, AlertCircle } from "lucide-react";
 
 const AddsForm = ({ newAd, setNewAd, onSubmit }) => {
+    const [notification, setNotification] = useState(null);
+
+    const showNotification = (message) => {
+        setNotification(message);
+        setTimeout(() => {
+            setNotification(null);
+        }, 3000);
+    };
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             if (file.size > 2 * 1024 * 1024) {
-                alert("Ukuran gambar maksimal 2MB");
+                showNotification("Ukuran gambar maksimal 2MB!"); 
+                e.target.value = null; 
                 return;
             }
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 setNewAd({
                     ...newAd,
-                    image_url: reader.result, 
-                    raw_image: file 
+                    image_url: reader.result,
+                    raw_image: file
                 });
             };
             reader.readAsDataURL(file);
@@ -32,13 +43,23 @@ const AddsForm = ({ newAd, setNewAd, onSubmit }) => {
         formData.append("description", newAd.description);
         formData.append("link", newAd.link);
         if (newAd.raw_image) {
-            formData.append("image", newAd.raw_image); 
+            formData.append("image", newAd.raw_image);
         }
         onSubmit(formData);
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
+        <form onSubmit={handleSubmit} className="space-y-4 relative" encType="multipart/form-data">
+            
+            {notification && (
+                <div className="absolute top-0 left-0 right-0 z-50 flex justify-center -mt-12 transition-all duration-300 ease-in-out">
+                    <div className="bg-red-500 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium animate-bounce">
+                        <AlertCircle className="w-4 h-4" />
+                        {notification}
+                    </div>
+                </div>
+            )}
+
             <div className="form-control">
                 <label className="label-text text-xs font-bold text-gray-500 mb-1 block">
                     Judul Utama
@@ -77,7 +98,7 @@ const AddsForm = ({ newAd, setNewAd, onSubmit }) => {
                 </label>
                 
                 {!newAd.image_url ? (
-                    <div className="w-full border border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative">
+                    <div className={`w-full border border-dashed rounded-lg p-6 flex flex-col items-center justify-center transition-colors cursor-pointer relative ${notification ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}>
                         <input 
                             type="file" 
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -85,8 +106,8 @@ const AddsForm = ({ newAd, setNewAd, onSubmit }) => {
                             accept="image/*"
                             required 
                         />
-                        <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
-                        <span className="text-xs text-gray-500 font-medium">Klik untuk upload banner</span>
+                        <ImageIcon className={`w-8 h-8 mb-2 ${notification ? 'text-red-400' : 'text-gray-400'}`} />
+                        <span className={`text-xs font-medium ${notification ? 'text-red-500' : 'text-gray-500'}`}>Klik untuk upload banner</span>
                         <span className="text-[10px] text-gray-400 mt-1">Maksimal 2MB</span>
                     </div>
                 ) : (

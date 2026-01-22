@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-    User, Mail, Phone, LogOut, Edit2, Save, MapPin, 
-    CreditCard, FileText, AlertCircle, CheckCircle, UploadCloud, Shield 
+    User, Phone, LogOut, Edit2, Save, MapPin, 
+    CreditCard, FileText, AlertCircle, CheckCircle, UploadCloud, Shield, X 
 } from "lucide-react";
 import { getCurrentUserProfile, updateProfile } from "../services/userServices";
 
 const ProfilePage = () => {
-        const [editLoading, setEditLoading] = useState(false);
-        const [backupFormData, setBackupFormData] = useState(null);
-        const [backupPreviewProfile, setBackupPreviewProfile] = useState("");
-        const [backupPreviewKTP, setBackupPreviewKTP] = useState("");
     const navigate = useNavigate();
     
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [editLoading, setEditLoading] = useState(false);
+
+    const [backupFormData, setBackupFormData] = useState(null);
+    const [backupPreviewProfile, setBackupPreviewProfile] = useState("");
+    const [backupPreviewKTP, setBackupPreviewKTP] = useState("");
+
+    const [notification, setNotification] = useState(null);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -32,6 +36,13 @@ const ProfilePage = () => {
     useEffect(() => {
         fetchProfile();
     }, []);
+
+    const showNotification = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => {
+            setNotification(null);
+        }, 3000);
+    };
 
     const fetchProfile = async () => {
         try {
@@ -56,6 +67,11 @@ const ProfilePage = () => {
     const handleFileChange = (e, type) => {
         const file = e.target.files[0];
         if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                showNotification("Ukuran file maksimal 2MB!", "error");
+                return;
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
                 if (type === "profile") {
@@ -74,7 +90,7 @@ const ProfilePage = () => {
         e.preventDefault();
         
         if (!formData.nik) {
-            alert("NIK Wajib diisi untuk keperluan verifikasi!");
+            showNotification("NIK wajib diisi untuk verifikasi akun!", "error");
             return;
         }
 
@@ -89,41 +105,71 @@ const ProfilePage = () => {
 
         try {
             await updateProfile(dataToSend);
-            alert("Data diri berhasil diperbarui!");
+            
+            showNotification("Data diri berhasil diperbarui!", "success");
+            
             setIsEditing(false);
             fetchProfile(); 
         } catch (error) {
             console.error(error);
-            alert("Gagal update profil.");
+            showNotification("Gagal memperbarui profil. Coba lagi.", "error");
         }
     };
 
     const handleLogout = () => {
-        if(window.confirm("Yakin ingin keluar dari aplikasi?")) {
-            localStorage.removeItem("token");
-            navigate("/login");
-        }
+        localStorage.removeItem("token");
+        navigate("/login");
     };
 
-    if (loading) {
+    if (loading || editLoading) {
         return (
-            <div className="flex justify-center py-20">
-                <span className="loading loading-spinner loading-lg text-teal-600"></span>
-            </div>
-        );
-    }
-
-    if (editLoading) {
-        return (
-            <div className="flex justify-center py-20">
+            <div className="flex justify-center py-20 min-h-screen bg-gray-50">
                 <span className="loading loading-spinner loading-lg text-teal-600"></span>
             </div>
         );
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto font-sans pb-10">
-            <div className="pt-8 pb-2 px-2 flex">
+        <div className="w-full max-w-4xl mx-auto font-sans pb-10 relative">
+            
+            {notification && (
+                <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-5 duration-300">
+                    <div className={`px-6 py-3 rounded-full shadow-xl flex items-center gap-3 text-white font-medium ${
+                        notification.type === 'success' ? 'bg-teal-600' : 'bg-red-500'
+                    }`}>
+                        {notification.type === 'success' ? <CheckCircle className="w-5 h-5"/> : <AlertCircle className="w-5 h-5"/>}
+                        {notification.message}
+                    </div>
+                </div>
+            )}
+
+            {showLogoutConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
+                        <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <LogOut className="w-8 h-8 text-red-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">Keluar Aplikasi?</h3>
+                        <p className="text-gray-500 mb-6 text-sm">Anda harus login kembali untuk mengakses akun Anda.</p>
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => setShowLogoutConfirm(false)}
+                                className="flex-1 btn btn-ghost text-gray-600 hover:bg-gray-100 rounded-xl"
+                            >
+                                Batal
+                            </button>
+                            <button 
+                                onClick={handleLogout}
+                                className="flex-1 btn bg-red-500 hover:bg-red-600 text-white border-none rounded-xl"
+                            >
+                                Ya, Keluar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="pt-8 pb-2 px-2 flex justify-between items-center">
                 <button
                     type="button"
                     onClick={() => navigate(user?.role === "admin" ? "/admin" : "/dashboard")}
@@ -135,6 +181,7 @@ const ProfilePage = () => {
                     Kembali ke Dashboard
                 </button>
             </div>
+
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">                
                 <div className="h-40 bg-teal-600 w-full relative">
                     <div className="absolute inset-0 bg-white/10 pattern-grid-lg opacity-20"></div>
@@ -143,8 +190,8 @@ const ProfilePage = () => {
                 <div className="px-8 pb-8 relative">
                     
                     <div className="flex flex-col items-center -mt-16 mb-6">
-                        <div className="relative">
-                            <div className="w-32 h-32 bg-white p-2 rounded-full shadow-lg">
+                        <div className="relative group">
+                            <div className="w-32 h-32 bg-white p-2 rounded-full shadow-lg overflow-hidden">
                                 {previewProfile ? (
                                     <img src={previewProfile} alt="Profile" className="w-full h-full rounded-full object-cover" />
                                 ) : (
@@ -154,7 +201,7 @@ const ProfilePage = () => {
                                 )}
                             </div>
                             
-                            <div className="absolute bottom-1 right-0 bg-teal-700 text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-white shadow-sm flex items-center gap-1">
+                            <div className="absolute bottom-1 right-0 bg-teal-700 text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-white shadow-sm flex items-center gap-1 z-10">
                                 <Shield className="w-3 h-3" />
                                 {user?.role === "admin" ? "Admin" : "Member"}
                             </div>
@@ -181,7 +228,7 @@ const ProfilePage = () => {
                     {!isEditing ? (
                         <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-teal-200 transition-colors">
                                     <div className="flex items-center gap-2 mb-1">
                                         <Phone className="w-4 h-4 text-teal-600" />
                                         <span className="text-xs font-bold text-gray-400 uppercase">WhatsApp</span>
@@ -189,7 +236,7 @@ const ProfilePage = () => {
                                     <p className="font-semibold text-gray-800 pl-6">{user?.phone || "-"}</p>
                                 </div>
                                 
-                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-teal-200 transition-colors">
                                     <div className="flex items-center gap-2 mb-1">
                                         <CreditCard className="w-4 h-4 text-teal-600" />
                                         <span className="text-xs font-bold text-gray-400 uppercase">NIK</span>
@@ -197,7 +244,7 @@ const ProfilePage = () => {
                                     <p className="font-semibold text-gray-800 pl-6">{user?.nik || "-"}</p>
                                 </div>
 
-                                <div className="md:col-span-2 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                <div className="md:col-span-2 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-teal-200 transition-colors">
                                     <div className="flex items-center gap-2 mb-1">
                                         <MapPin className="w-4 h-4 text-teal-600" />
                                         <span className="text-xs font-bold text-gray-400 uppercase">Alamat Domisili</span>
@@ -229,13 +276,13 @@ const ProfilePage = () => {
                                         setEditLoading(false);
                                         setIsEditing(true);
                                     }}
-                                    className="flex-1 btn bg-teal-600 hover:bg-teal-700 text-white border-none rounded-xl font-bold shadow-md flex gap-2"
+                                    className="flex-1 btn bg-teal-600 hover:bg-teal-700 text-white border-none rounded-xl font-bold shadow-md flex gap-2 transition-all hover:-translate-y-1"
                                 >
                                     <Edit2 className="w-4 h-4" /> Lengkapi Data Diri
                                 </button>
                                 <button 
-                                    onClick={handleLogout}
-                                    className="btn btn-outline border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 rounded-xl font-bold flex gap-2"
+                                    onClick={() => setShowLogoutConfirm(true)}
+                                    className="btn btn-outline border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 rounded-xl font-bold flex gap-2 transition-all"
                                 >
                                     <LogOut className="w-4 h-4" /> Keluar
                                 </button>
@@ -266,15 +313,15 @@ const ProfilePage = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="form-control">
                                     <label className="label text-xs font-bold text-gray-500 uppercase">Nama Lengkap</label>
-                                    <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full rounded-lg bg-gray-50 focus:bg-white pl-3 border border-teal-600 focus:border-teal-600 outline-none py-2" placeholder="Nama Sesuai KTP" />
+                                    <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full rounded-lg bg-gray-50 focus:bg-white pl-3 border border-teal-600 focus:border-teal-600 outline-none py-2 transition-all" placeholder="Nama Sesuai KTP" />
                                 </div>
                                 <div className="form-control">
                                     <label className="label text-xs font-bold text-gray-500 uppercase">No. WhatsApp</label>
-                                    <input type="text" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full rounded-lg bg-gray-50 focus:bg-white pl-3 border border-teal-600 focus:border-teal-600 outline-none py-2" placeholder="08..." />
+                                    <input type="text" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full rounded-lg bg-gray-50 focus:bg-white pl-3 border border-teal-600 focus:border-teal-600 outline-none py-2 transition-all" placeholder="08..." />
                                 </div>
                                 <div className="form-control md:col-span-2">
                                     <label className="label text-xs font-bold text-gray-500 uppercase">Alamat Domisili</label>
-                                    <textarea value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full rounded-lg bg-gray-50 focus:bg-white resize-none pl-3 border border-teal-600 focus:border-teal-600 outline-none py-2" rows={2} placeholder="Alamat lengkap..." />
+                                    <textarea value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full rounded-lg bg-gray-50 focus:bg-white resize-none pl-3 border border-teal-600 focus:border-teal-600 outline-none py-2 transition-all" rows={2} placeholder="Alamat lengkap..." />
                                 </div>
                             </div>
 
@@ -285,7 +332,7 @@ const ProfilePage = () => {
                                 <div className="space-y-4">
                                     <div className="form-control">
                                         <label className="label text-xs font-bold text-orange-900/70 uppercase">NIK (16 Digit)</label>
-                                        <input type="number" value={formData.nik} onChange={(e) => setFormData({...formData, nik: e.target.value})} className="w-full rounded-lg font-semibold pl-3 border border-teal-600 focus:border-teal-600 outline-none py-2" placeholder="NIK" required disabled={!!user?.nik} />
+                                        <input type="number" value={formData.nik} onChange={(e) => setFormData({...formData, nik: e.target.value})} className="w-full rounded-lg font-semibold pl-3 border border-teal-600 focus:border-teal-600 outline-none py-2 transition-all" placeholder="NIK" required disabled={!!user?.nik} />
                                     </div>
                                     <div className="form-control">
                                         <label className="label text-xs font-bold text-orange-900/70 uppercase">Upload Foto KTP</label>
@@ -315,8 +362,8 @@ const ProfilePage = () => {
                                         setPreviewProfile(backupPreviewProfile || previewProfile);
                                         setPreviewKTP(backupPreviewKTP || previewKTP);
                                         setIsEditing(false);
-                                    }} className="flex-1 btn btn-ghost border-gray-300 rounded-xl text-gray-500">Batal</button>
-                                <button type="submit" className="flex-1 btn bg-teal-600 hover:bg-teal-700 text-white border-none rounded-xl shadow-lg">
+                                    }} className="flex-1 btn btn-ghost border-gray-300 rounded-xl text-gray-500 hover:bg-gray-100">Batal</button>
+                                <button type="submit" className="flex-1 btn bg-teal-600 hover:bg-teal-700 text-white border-none rounded-xl shadow-lg transition-all hover:translate-y-px">
                                     <Save className="w-4 h-4" /> Simpan Data
                                 </button>
                             </div>
