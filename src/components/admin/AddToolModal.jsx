@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Info, Image as ImageIcon } from "lucide-react";
+import { X, Info, Image as ImageIcon, AlertCircle } from "lucide-react";
 
 const TOOL_PRESETS = {
   MOBILITAS: {
@@ -41,6 +41,8 @@ const AddToolModal = ({ isOpen, onClose, onSubmit }) => {
   const [customName, setCustomName] = useState("");     
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  const [notification, setNotification] = useState(null);
+  
   const [formData, setFormData] = useState({
     type: "", size: "", dimensions: "", weight_cap: "", 
     stock: "", condition: "baik", description: "",
@@ -59,8 +61,16 @@ const AddToolModal = ({ isOpen, onClose, onSubmit }) => {
          image_url: "", raw_image: null
        });
        setIsSubmitting(false);
+       setNotification(null); 
     }
   }, [isOpen]);
+
+  const showNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => {
+        setNotification(null);
+    }, 3000);
+  };
 
   const getLabels = () => {
     const catData = TOOL_PRESETS[category];
@@ -72,7 +82,11 @@ const AddToolModal = ({ isOpen, onClose, onSubmit }) => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) { alert("Maks 2MB"); return; }
+      if (file.size > 2 * 1024 * 1024) { 
+        showNotification("Ukuran file maksimal 2MB!"); 
+        e.target.value = null; 
+        return; 
+      }
       
       const reader = new FileReader();
       reader.onloadend = () => setFormData({ 
@@ -90,12 +104,12 @@ const AddToolModal = ({ isOpen, onClose, onSubmit }) => {
     const finalName = selectedTool === "Lainnya" ? customName : selectedTool;
 
     if (!finalName || !formData.stock) {
-        alert("Nama alat dan stok harus diisi!");
+        showNotification("Nama alat dan stok wajib diisi!");
         return;
     }
 
     if (!formData.raw_image) {
-        alert("Mohon upload foto alat!");
+        showNotification("Mohon upload foto alat sebagai bukti!");
         return;
     }
 
@@ -120,6 +134,7 @@ const AddToolModal = ({ isOpen, onClose, onSubmit }) => {
         
     } catch (error) {
         console.error(error);
+        showNotification("Gagal menyimpan data. Coba lagi.");
     } finally {
         setIsSubmitting(false); 
     }
@@ -131,6 +146,15 @@ const AddToolModal = ({ isOpen, onClose, onSubmit }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 relative overflow-y-auto max-h-[90vh] animate-in fade-in zoom-in duration-200">
         
+        {notification && (
+            <div className="absolute top-4 left-0 right-0 z-50 flex justify-center px-4">
+                <div className="bg-red-500 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium animate-bounce">
+                    <AlertCircle className="w-4 h-4" />
+                    {notification}
+                </div>
+            </div>
+        )}
+
         <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
             <div>
               <h3 className="text-xl font-bold text-gray-900">Tambah Alat Medis</h3>
@@ -254,7 +278,8 @@ const AddToolModal = ({ isOpen, onClose, onSubmit }) => {
 
                 <div className="form-control">
                     <label className="label-text text-sm font-medium text-gray-600 mb-1.5 block">Foto Alat</label>
-                    <div className="flex items-center gap-3">
+                    
+                    <div className={`flex items-center gap-3 p-2 border rounded-lg ${notification && !formData.image_url ? 'border-red-300 bg-red-50' : 'border-transparent'}`}>
                         <input 
                             type="file" 
                             className="file-input file-input-bordered file-input-sm w-full bg-white focus:border-teal-500 text-gray-500" 

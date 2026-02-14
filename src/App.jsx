@@ -16,6 +16,7 @@ import ToolDetailPage from './pages/ToolDetailPage'
 import ToolPage from './pages/ToolPage'
 import DonationPage from './pages/DonationPage'
 import ProfilePage from './pages/ProfilePage'
+import NewsDetailPage from './pages/NewsDetailPage'
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOTPPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/alat" element={<ToolPage />} />
+          <Route path="/news/:id" element={<NewsDetailPage />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['user']} />}>
