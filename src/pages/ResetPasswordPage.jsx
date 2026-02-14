@@ -23,32 +23,11 @@ const ResetPasswordPage = () => {
     }
   }, [email, otp, navigate]);
 
-  const getPasswordStrength = () => {
-    if (!newPassword) return { strength: 'none', text: '', color: '' };
-    
-    let strength = 0;
-    if (newPassword.length >= 6) strength++;
-    if (newPassword.length >= 8) strength++;
-    if (/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword)) strength++;
-    if (/\d/.test(newPassword)) strength++;
-    if (/[^a-zA-Z0-9]/.test(newPassword)) strength++;
-
-    if (strength <= 1) return { strength: 'weak', text: 'Lemah', color: 'text-red-600' };
-    if (strength <= 3) return { strength: 'medium', text: 'Sedang', color: 'text-yellow-600' };
-    return { strength: 'strong', text: 'Kuat', color: 'text-green-600' };
-  };
-
-  const passwordStrength = getPasswordStrength();
   const passwordsMatch = newPassword && confirmPassword && newPassword === confirmPassword;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (newPassword.length < 6) {
-      setError('Password minimal 6 karakter');
-      return;
-    }
 
     if (newPassword !== confirmPassword) {
       setError('Password tidak cocok');
@@ -151,25 +130,6 @@ const ResetPasswordPage = () => {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            
-            {newPassword && (
-              <div className="mt-2">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all ${
-                        passwordStrength.strength === 'weak' ? 'w-1/3 bg-red-500' :
-                        passwordStrength.strength === 'medium' ? 'w-2/3 bg-yellow-500' :
-                        'w-full bg-green-500'
-                      }`}
-                    />
-                  </div>
-                  <span className={`text-xs font-medium ${passwordStrength.color}`}>
-                    {passwordStrength.text}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
 
           <div>
@@ -211,7 +171,7 @@ const ResetPasswordPage = () => {
 
           <button
             type="submit"
-            disabled={loading || !passwordsMatch || newPassword.length < 6}
+            disabled={loading || !passwordsMatch}
             className="btn btn-primary w-full bg-teal-500 rounded-lg hover:bg-teal-600 border-none text-white font-semibold text-base h-12 disabled:bg-gray-400"
           >
             {loading ? (
