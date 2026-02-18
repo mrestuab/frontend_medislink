@@ -245,7 +245,9 @@ const AddToolModal = ({ isOpen, onClose, onSubmit }) => {
                             type="number" 
                             value={formData.stock} 
                             onChange={(e) => setFormData({...formData, stock: e.target.value})} 
-                            className="input input-bordered w-full bg-gray-50 focus:bg-white focus:border-teal-500 border-teal-200 transition-all font-semibold text-gray-900" 
+                            className="input input-bordered w-full bg-gray-50 focus:bg-white focus:border-teal-500 border-teal-200 transition-all font-semibold text-gray-900 pr-4" 
+                            placeholder="0"
+                            min="0"
                             required 
                         />
                     </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, Tag, Weight, Ruler, Trash2, Edit } from "lucide-react";
 
-const InventoryTable = ({ tools, onDelete }) => {
+const InventoryTable = ({ tools, onDelete, onEdit }) => {
   if (!tools || tools.length === 0) {
     return (
       <div className="text-center py-16 text-gray-500 bg-white border border-gray-200 rounded-xl">
@@ -81,7 +81,11 @@ const InventoryTable = ({ tools, onDelete }) => {
             </div>
 
             <div className="mt-4 flex gap-2">
-                <button className="btn btn-xs btn-outline flex-1 normal-case gap-1 rounded-lg bg-gray-100 border-gray-300 hover:bg-gray-200" title="Edit">
+                <button 
+                    onClick={() => onEdit(tool)} 
+                    className="btn btn-xs btn-outline flex-1 normal-case gap-1 rounded-lg bg-gray-100 border-gray-300 hover:bg-gray-200" 
+                    title="Edit"
+                >
                     <Edit className="w-3 h-3" /> Edit
                 </button>
                 <button 

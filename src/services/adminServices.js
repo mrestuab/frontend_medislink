@@ -29,6 +29,10 @@ export const getTools = async () => {
   }
 };
 
+export const updateTool = async (id, toolData) => {
+  return await api.put(`/tools/${id}`, toolData);
+};
+
 export const deleteTool = async (id) => {
   return await api.delete(`/tools/${id}`);
 };
@@ -36,6 +40,11 @@ export const deleteTool = async (id) => {
 export const getAllLoans = async () => {
   try {
     const response = await api.get("/loans"); 
+    
+    // Handle null or empty response
+    if (!response.data || !Array.isArray(response.data)) {
+      return [];
+    }
   
     return response.data.map(loan => ({
         id: loan.id || loan._id,

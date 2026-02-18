@@ -9,11 +9,13 @@ import AddsList from "../../components/admin/AddsList";
 import LoansTable from "../../components/admin/LoansTable";
 import InventoryTable from "../../components/admin/InventoryTable";
 import AddToolModal from "../../components/admin/AddToolModal";
+import EditToolModal from "../../components/admin/EditToolModal";
 import DonationsTable from "./DonationTable";
 
 import { 
     getTools, 
     createTool, 
+    updateTool,
     deleteTool, 
     getAllLoans, 
     updateLoanStatus, 
@@ -34,6 +36,8 @@ export default function AdminDashboard() {
   
   const [activeTab, setActiveTab] = useState("inventory"); 
   const [isAddToolOpen, setIsAddToolOpen] = useState(false);
+  const [isEditToolOpen, setIsEditToolOpen] = useState(false);
+  const [editingTool, setEditingTool] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   
   const [notification, setNotification] = useState(null);
@@ -162,6 +166,24 @@ export default function AdminDashboard() {
         console.error("Gagal create tool:", error);
         showNotification("Gagal menambahkan alat.", "error");
       }
+  };
+
+  const handleEditTool = (tool) => {
+    setEditingTool(tool);
+    setIsEditToolOpen(true);
+  };
+
+  const handleUpdateTool = async (id, formData) => {
+    try {
+      await updateTool(id, formData);
+      setIsEditToolOpen(false);
+      setEditingTool(null);
+      fetchData();
+      showNotification("Berhasil memperbarui data alat!", "success");
+    } catch (error) {
+      console.error("Gagal update tool:", error);
+      showNotification("Gagal memperbarui alat.", "error");
+    }
   };
 
   const handleDeleteTool = (id) => {
@@ -359,8 +381,9 @@ export default function AdminDashboard() {
                     <Plus className="w-5 h-5" /> Tambah Alat
                 </button>
              </div>
-             <InventoryTable tools={tools} onDelete={handleDeleteTool} />
+             <InventoryTable tools={tools} onDelete={handleDeleteTool} onEdit={handleEditTool} />
              <AddToolModal isOpen={isAddToolOpen} onClose={() => setIsAddToolOpen(false)} onSubmit={handleAddTool} />
+             <EditToolModal isOpen={isEditToolOpen} onClose={() => setIsEditToolOpen(false)} onSubmit={handleUpdateTool} tool={editingTool} />
           </div>
         )}
 
