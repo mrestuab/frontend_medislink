@@ -208,7 +208,7 @@ const DonationsTable = ({ donations, onReceive, onApprove }) => {
                               <Eye className="w-4 h-4" /> Review
                           </button>
                       ) : item.status === "received" ? (
-                          <button onClick={() => handleReviewClick(item)} className="btn btn-sm bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 hover:border-blue-300 gap-2 shadow-sm font-medium transition-all p-2 rounded-full min-w-[110px]">
+                          <button onClick={() => handleReviewClick(item)} className="btn btn-sm bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs border border-blue-200 hover:border-blue-300 gap-2 shadow-sm font-medium transition-all p-2 rounded-full">
                               <ClipboardCheck className="w-4 h-4" /> QC
                           </button>
                       ) : (
