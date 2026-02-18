@@ -10,7 +10,7 @@ import UserDashboardPage from './pages/UserDashboardPage'
 import AdminDashboard from './pages/admin/AdminDashboardPage'
 
 import UserLayout from './layouts/UserLayout'
-        import TentangKami from "./pages/TentangKami";
+import TentangKami from "./pages/TentangKami";
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
 import ToolDetailPage from './pages/ToolDetailPage'
@@ -23,9 +23,9 @@ import NewsDetailPage from './pages/NewsDetailPage'
 function App() {
   return (
     <div>
-        <Route path="/tentang-kami" element={<TentangKami />} />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/tentang-kami" element={<TentangKami />} />
 
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<LoginPage />} />
