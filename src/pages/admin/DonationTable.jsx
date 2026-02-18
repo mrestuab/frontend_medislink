@@ -209,7 +209,7 @@ const DonationsTable = ({ donations, onReceive, onApprove }) => {
                           </button>
                       ) : item.status === "received" ? (
                           <button onClick={() => handleReviewClick(item)} className="btn btn-sm bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 hover:border-blue-300 gap-2 shadow-sm font-medium transition-all p-2 rounded-full min-w-[110px]">
-                              <ClipboardCheck className="w-4 h-4" /> Proses QC
+                              <ClipboardCheck className="w-4 h-4" /> QC
                           </button>
                       ) : (
                           <button disabled className="btn btn-sm btn-disabled bg-gray-50 border-none text-gray-400 gap-2 opacity-60">
