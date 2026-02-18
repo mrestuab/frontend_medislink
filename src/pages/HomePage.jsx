@@ -271,9 +271,8 @@ export default function HomePage() {
                     <span className="font-bold text-xl text-gray-800">MedisLink</span>
                 </div>
                 <div className="flex gap-8">
-                    <Link to="#" className="text-gray-500 hover:text-teal-600 text-sm font-medium transition-colors">Tentang Kami</Link>
-                    <Link to="#" className="text-gray-500 hover:text-teal-600 text-sm font-medium transition-colors">Kebijakan Privasi</Link>
-                    <Link to="#" className="text-gray-500 hover:text-teal-600 text-sm font-medium transition-colors">Bantuan</Link>
+                    <Link to="/tentang-kami" className="text-gray-500 hover:text-teal-600 text-sm font-medium transition-colors">Tentang Kami</Link>
+                    <a href="https://wa.me/6281564602171" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-teal-600 text-sm font-medium transition-colors">Bantuan</a>
                 </div>
             </div>
             <div className="border-t border-gray-100 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
