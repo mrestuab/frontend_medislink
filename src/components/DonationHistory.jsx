@@ -86,7 +86,7 @@ const DonationHistory = () => {
                                             </span>
                                         ) : item.status === "received" ? (
                                             <span className="flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-blue-200">
-                                                <ClipboardCheck className="w-3 h-3" /> Dalam Proses QC
+                                                <ClipboardCheck className="w-3 h-3" /> Proses QC
                                             </span>
                                         ) : (
                                             <span className="flex items-center gap-1 bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-amber-200">
