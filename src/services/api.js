@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://backendmedislink-production.up.railway.app/api',
+  baseURL: 'https://backend-medislink.vercel.app/api',
 });
 
 api.interceptors.request.use(
